@@ -1,0 +1,76 @@
+name: Build and deploy to jonasjlc.github.io
+
+on:
+  push:
+    branches: [ main ]
+
+# prevent overlapping deploys from stepping on each other
+concurrency:
+  group: pages-deploy
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout project
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false  # avoid writing GITHUB_TOKEN into git config
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build
+        working-directory: frontend
+        run: npm run build
+        # if your output is dist/, update the copy step accordingly
+
+      - name: Checkout target user site repo
+        uses: actions/checkout@v4
+        with:
+          repository: JonasJLC/jonasjlc.github.io
+          ref: main
+          token: ${{ secrets.TARGET_REPO_PAT }}  # PAT with repo scope on target repo
+          path: site
+          fetch-depth: 0  # lets us pull/rebase if needed
+
+      - name: Ensure target directory (and .nojekyll) exist
+        run: |
+          mkdir -p site/garmin-dashboard
+          [ -f site/.nojekyll ] || touch site/.nojekyll
+
+      - name: Copy build into user site
+        run: |
+          # Adjust 'build' to your output folder (e.g., 'dist' for Vite)
+          rsync -a --delete ./frontend/dist/ site/garmin-dashboard/
+
+      - name: Configure git user
+        working-directory: site
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit & push changes to user site
+        working-directory: site
+        run: |
+          git add garmin-dashboard .nojekyll
+          if ! git diff --cached --quiet; then
+            # Rebase in case the site changed while we were building
+            git pull --rebase --autostash origin HEAD || true
+            git commit -m "Deploy garmin-dashboard from ${GITHUB_REPOSITORY}@${GITHUB_SHA::7}"
+            git push origin HEAD
+          else
+            echo "No changes to deploy"
+          fi

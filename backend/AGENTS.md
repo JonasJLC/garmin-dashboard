@@ -82,6 +82,7 @@ backend/
 │   │
 │   └── main.py                         # Entry point
 │
+├── notebooks/                          # Experiments / research (optional)
 │
 └── docs/                               # Documentation (optional)
 ```
