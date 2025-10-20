@@ -1,3 +1,8 @@
-[]
+[
+  {"id":1,"name":"Morning Run","startTimeLocal":"2025-10-20T06:45:00","durationSec":3120,"distanceKm":7.4,"avgHr":152,"type":"running"},
+  {"id":2,"name":"Lunch Ride","startTimeLocal":"2025-10-19T12:10:00","durationSec":4200,"distanceKm":22.8,"avgHr":138,"type":"cycling"},
+  {"id":3,"name":"Evening Walk","startTimeLocal":"2025-10-18T19:05:00","durationSec":1800,"distanceKm":2.3,"avgHr":98,"type":"walking"},
+  {"id":4,"name":"HIIT Workout","startTimeLocal":"2025-10-17T07:25:00","durationSec":2400,"avgHr":162,"type":"training"}
+]
 
 

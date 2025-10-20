@@ -9,7 +9,7 @@ docs/.DS_Store
 # ==================== NODE / FRONTEND ====================
 # Dependencies
 node_modules/
-package-lock.json
+!frontend/package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
