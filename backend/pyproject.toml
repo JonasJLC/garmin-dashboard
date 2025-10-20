@@ -1,0 +1,17 @@
+[project]
+name = "garmin-backend"
+version = "0.1.0"
+description = "Local data fetcher for Garmin, writes JSON for frontend"
+requires-python = ">=3.14"
+dependencies = [
+    "garminconnect>=0.2.30",
+    "garth>=0.5.17",
+    "polars>=1.34.0",
+    "pydantic-settings>=2.11.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.14.1",
+    "ty>=0.0.1a23",
+]
