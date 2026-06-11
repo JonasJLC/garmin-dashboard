@@ -8,10 +8,13 @@ This backend contains local Python scripts for fetching Garmin data and writing 
 - Package manager: `uv`
 - Linting: `ruff`
 - Type checking: `ty`
-- Data handling: `polars`
-- Settings: `pydantic-settings`
+- Testing: `pytest`
 
 Prefer `pathlib.Path` for filesystem paths and keep scripts small, typed, and explicit.
+
+The data-normalization helpers (`normalize_daily`, `normalize_hr`, `normalize_activity`,
+`average_heart_rate`, `build_manifest`) are pure and unit-tested under `tests/`; the `garminconnect`
+import is lazy inside `main()` so the helpers stay importable (garth currently breaks on Python 3.14).
 
 ## Setup
 
@@ -26,6 +29,7 @@ Common checks:
 ```bash
 uv run ruff check .
 uv run ty check .
+uv run pytest
 ```
 
 ## Garmin Authentication
@@ -36,6 +40,10 @@ Garmin credentials are read from the environment:
 export GARMIN_EMAIL="you@example.com"
 export GARMIN_PASSWORD="<your-password>"
 ```
+
+For headless/CI runs, set `GARMINTOKENS` to a saved `garth` token instead; `Garmin.login()` reads it
+(base64 dump when over 512 chars, otherwise a token directory path). This is how `refresh-data.yml`
+authenticates, since interactive MFA cannot run in CI.
 
 On first use, run a login flow so `garminconnect`/`garth` can persist tokens in `~/.garminconnect`:
 
@@ -61,11 +69,28 @@ chmod 700 ~/.garminconnect
 uv run python scripts/pull_garmin_data.py
 ```
 
+Set `GARMIN_DAYS` (default `7`) to control how many days back to backfill.
+
 The script writes snapshots to `../frontend/public/data/garmin/`:
 
 - `daily-YYYY-MM-DD.json`
 - `hr-YYYY-MM-DD.json`
 - `activities.json`
+- `index.json` — manifest of available dates read by the frontend
+
+## Demo Data
+
+For local UI work without a Garmin account, generate a deterministic month of
+sample snapshots:
+
+```bash
+uv run python scripts/generate_mock_data.py
+```
+
+This writes ~30 days of `daily-*`/`hr-*` snapshots, a richer `activities.json`,
+and `index.json` (fixed seed and end date, so output is reproducible). It is a
+demo-data helper only — it never contacts Garmin and is separate from
+`pull_garmin_data.py`, which remains the source of real data.
 
 ## Change Guidelines
 

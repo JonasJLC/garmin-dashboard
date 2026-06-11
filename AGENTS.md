@@ -26,10 +26,13 @@ Common checks:
 ```bash
 pnpm lint
 pnpm typecheck
+pnpm test
 pnpm build
 ```
 
-The app reads static Garmin data from `frontend/public/data/garmin/` and validates it in `frontend/src/features/garmin`.
+`pnpm-lock.yaml` is committed and CI uses `--frozen-lockfile`; run `pnpm install` after dependency changes to keep it in sync.
+
+The app reads static Garmin data from `frontend/public/data/garmin/` and validates it in `frontend/src/features/garmin`. It loads the date list from `index.json` and renders only days that exist.
 
 ## Backend Data Fetcher
 
@@ -40,7 +43,7 @@ cd backend
 uv sync
 ```
 
-The backend depends on `garminconnect` and `garth`. Garmin auth tokens are stored in `~/.garminconnect`.
+The backend depends on `garminconnect` and `garth`. Garmin auth tokens are stored in `~/.garminconnect`. For headless/CI runs, set `GARMINTOKENS` to a saved `garth` token instead of email/password (see `backend/AGENTS.md`).
 
 ## Garmin Authentication
 
@@ -74,11 +77,25 @@ export GARMIN_PASSWORD="<your-password>"
 uv run python scripts/pull_garmin_data.py
 ```
 
+The fetcher backfills the last `GARMIN_DAYS` days (default `7`).
+
 Outputs are written to `frontend/public/data/garmin/`:
 
 - `daily-YYYY-MM-DD.json`
 - `hr-YYYY-MM-DD.json`
 - `activities.json`
+- `index.json` — manifest of available dates read by the frontend
+
+`.github/workflows/refresh-data.yml` can run this on a schedule using the `GARMINTOKENS` secret.
+
+For local UI work without a Garmin account, generate deterministic demo snapshots instead:
+
+```bash
+cd backend
+uv run python scripts/generate_mock_data.py
+```
+
+This writes ~30 days of reproducible sample data and never contacts Garmin (see `backend/AGENTS.md`).
 
 ## Commit Data Snapshots
 
@@ -115,6 +132,10 @@ Choose the conventional commit type and scope from the actual change, such as `d
 The frontend builds to `frontend/dist`.
 
 Deployment is handled by `.github/workflows/deploy-to-user-site.yml`, which copies the built app into the `garmin-dashboard/` directory of the `JonasJLC/jonasjlc.github.io` repository.
+
+## Privacy
+
+The committed JSON snapshots are personal health data published to a public GitHub Pages site (and kept in git history). Before committing real data, decide whether to keep this repo private, deploy to a private host, or aggregate/anonymize the snapshots.
 
 ## Reference
 

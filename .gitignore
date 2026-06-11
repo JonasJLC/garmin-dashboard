@@ -9,9 +9,8 @@ docs/.DS_Store
 # ==================== NODE / FRONTEND ====================
 # Dependencies
 node_modules/
-!frontend/package-lock.json
 yarn.lock
-pnpm-lock.yaml
+package-lock.json
 
 # Vite build output
 dist/
@@ -35,8 +34,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
+backend/lib/
+backend/lib64/
 parts/
 sdist/
 var/

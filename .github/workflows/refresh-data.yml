@@ -1,0 +1,56 @@
+name: Refresh Garmin data
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Mondays at 05:17 UTC. Adjust as needed.
+    - cron: '17 5 * * 1'
+
+# Only one refresh at a time; let an in-flight run finish.
+concurrency:
+  group: refresh-data
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: uv sync
+
+      - name: Fetch Garmin data
+        working-directory: backend
+        # GARMINTOKENS holds a base64 garth token dump (see backend/README.md).
+        # Garmin's interactive MFA login cannot run headlessly, so a pre-saved
+        # token is required; the run fails clearly if the secret is missing.
+        env:
+          GARMINTOKENS: ${{ secrets.GARMINTOKENS }}
+          GARMIN_DAYS: '7'
+        run: |
+          if [ -z "$GARMINTOKENS" ]; then
+            echo "GARMINTOKENS secret is not set; cannot authenticate headlessly." >&2
+            exit 1
+          fi
+          uv run python scripts/pull_garmin_data.py
+
+      - name: Commit refreshed snapshots
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add frontend/public/data/garmin/*.json
+          if git diff --cached --quiet; then
+            echo "No data changes to commit"
+          else
+            git commit -m "chore(data): refresh garmin snapshots"
+            git push origin HEAD:${GITHUB_REF_NAME}
+          fi

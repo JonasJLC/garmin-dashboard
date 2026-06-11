@@ -1,36 +1,34 @@
 import * as React from 'react'
+import { cva, type VariantProps } from 'class-variance-authority'
+import { cn } from '@/lib/utils'
 
-type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: 'default' | 'outline' | 'ghost'
-  size?: 'sm' | 'md' | 'lg'
+const buttonVariants = cva(
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0',
+  {
+    variants: {
+      variant: {
+        default: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        outline: 'border border-border bg-transparent hover:bg-accent hover:text-accent-foreground',
+        ghost: 'hover:bg-accent hover:text-accent-foreground',
+        secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+      },
+      size: {
+        sm: 'h-8 px-3',
+        md: 'h-10 px-4',
+        lg: 'h-12 px-6 text-base',
+        icon: 'h-9 w-9',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      size: 'md',
+    },
+  },
+)
+
+export type ButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> &
+  VariantProps<typeof buttonVariants>
+
+export function Button({ className, variant, size, ...props }: ButtonProps) {
+  return <button className={cn(buttonVariants({ variant, size }), className)} {...props} />
 }
-
-export function Button({
-  className,
-  variant = 'default',
-  size = 'md',
-  ...props
-}: ButtonProps) {
-  const variantClass =
-    variant === 'outline'
-      ? 'border border-gray-300 dark:border-gray-700'
-      : variant === 'ghost'
-      ? 'bg-transparent hover:bg-gray-100 dark:hover:bg-gray-800'
-      : 'bg-gray-900 text-white hover:bg-gray-800 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200'
-
-  const sizeClass =
-    size === 'sm'
-      ? 'h-8 px-3 text-sm'
-      : size === 'lg'
-      ? 'h-12 px-6 text-base'
-      : 'h-10 px-4 text-sm'
-
-  return (
-    <button
-      className={`inline-flex items-center justify-center rounded-md ${variantClass} ${sizeClass} ${className ?? ''}`}
-      {...props}
-    />
-  )
-}
-
-

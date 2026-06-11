@@ -38,6 +38,12 @@ select = ["ALL"]
 extend-select = ["I"]
 ignore = ["D203", "D213"]
 
+[lint.per-file-ignores]
+# Tests use bare asserts and don't need docstrings or a package marker.
+"tests/**" = ["S101", "D", "INP001", "PLR2004", "ANN"]
+# The demo-data generator uses non-cryptographic randomness on purpose.
+"scripts/generate_mock_data.py" = ["S311"]
+
 [format]
 quote-style = "double"
 indent-style = "space"

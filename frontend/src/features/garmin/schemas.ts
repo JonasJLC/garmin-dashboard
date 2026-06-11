@@ -1,5 +1,12 @@
 import { z } from 'zod'
 
+export const ManifestSchema = z.object({
+  dates: z.array(z.string()),
+  updatedAt: z.string().optional(),
+})
+
+export type Manifest = z.infer<typeof ManifestSchema>
+
 export const DailySummarySchema = z.object({
   date: z.string(),
   steps: z.number().nonnegative(),
