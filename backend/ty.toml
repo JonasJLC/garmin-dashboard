@@ -1,3 +1,8 @@
 [src]
 include = ["scripts"]
 exclude = ["notebooks"]
+
+[environment]
+# scripts/ is run directly (not a package), so sibling imports like
+# `pull_garmin_data` resolve via the script directory at runtime.
+extra-paths = ["scripts"]

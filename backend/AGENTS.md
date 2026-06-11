@@ -78,6 +78,20 @@ The script writes snapshots to `../frontend/public/data/garmin/`:
 - `activities.json`
 - `index.json` — manifest of available dates read by the frontend
 
+## Demo Data
+
+For local UI work without a Garmin account, generate a deterministic month of
+sample snapshots:
+
+```bash
+uv run python scripts/generate_mock_data.py
+```
+
+This writes ~30 days of `daily-*`/`hr-*` snapshots, a richer `activities.json`,
+and `index.json` (fixed seed and end date, so output is reproducible). It is a
+demo-data helper only — it never contacts Garmin and is separate from
+`pull_garmin_data.py`, which remains the source of real data.
+
 ## Change Guidelines
 
 - Do not commit Garmin credentials or auth tokens.

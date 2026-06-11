@@ -88,6 +88,15 @@ Outputs are written to `frontend/public/data/garmin/`:
 
 `.github/workflows/refresh-data.yml` can run this on a schedule using the `GARMINTOKENS` secret.
 
+For local UI work without a Garmin account, generate deterministic demo snapshots instead:
+
+```bash
+cd backend
+uv run python scripts/generate_mock_data.py
+```
+
+This writes ~30 days of reproducible sample data and never contacts Garmin (see `backend/AGENTS.md`).
+
 ## Commit Data Snapshots
 
 ```bash

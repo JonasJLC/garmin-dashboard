@@ -49,6 +49,15 @@ export async function getDailySummaries(dates: string[]): Promise<DailySummary[]
     .map((r) => r.value)
 }
 
+// Load heart-rate summaries for many dates, dropping any that fail so a single
+// missing/invalid day does not blank the dashboard. Order follows `dates`.
+export async function getHeartRateSummaries(dates: string[]): Promise<HeartRateSummary[]> {
+  const results = await Promise.allSettled(dates.map(getHeartRateSummary))
+  return results
+    .filter((r): r is PromiseFulfilledResult<HeartRateSummary> => r.status === 'fulfilled')
+    .map((r) => r.value)
+}
+
 export function sumSteps(summaries: Pick<DailySummary, 'steps'>[]): number {
   return summaries.reduce((total, s) => total + s.steps, 0)
 }

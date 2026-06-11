@@ -1,32 +1,50 @@
-import './App.css'
 import { useEffect, useMemo, useState } from 'react'
-import { getActivities, getDailySummaries, getManifest, sumSteps } from './features/garmin/data'
-import type { Activity, DailySummary } from './features/garmin/schemas'
+import {
+  getActivities,
+  getDailySummaries,
+  getHeartRateSummaries,
+  getManifest,
+} from './features/garmin/data'
+import type { Activity, DailySummary, HeartRateSummary } from './features/garmin/schemas'
+import { buildHeadline, buildKpis, weeklyGoal } from './features/garmin/insights'
 import { StepsChart } from './components/charts/steps-chart'
 import { HeartRateChart } from './components/charts/heart-rate-chart'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
-import { Separator } from './components/ui/separator'
-import { Badge } from './components/ui/badge'
-import { Progress } from './components/ui/progress'
 import { ThemeToggle } from './components/ui/theme-toggle'
+import { StatCard } from './components/dashboard/stat-card'
+import { InsightBanner } from './components/dashboard/insight-banner'
+import { GoalRing } from './components/dashboard/goal-ring'
+import { ActivityItem } from './components/dashboard/activity-item'
 
-const WEEKLY_STEPS_TARGET = 60000
+const WEEKLY_STEPS_TARGET = 70000
+const DAILY_STEPS_GOAL = 10000
+
+function formatUpdatedAt(iso?: string): string | null {
+  if (!iso) return null
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return null
+  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+}
 
 function App() {
   const [activities, setActivities] = useState<Activity[] | null>(null)
-  const [dates, setDates] = useState<string[]>([])
   const [summaries, setSummaries] = useState<DailySummary[]>([])
+  const [hrSummaries, setHrSummaries] = useState<HeartRateSummary[]>([])
+  const [updatedAt, setUpdatedAt] = useState<string | undefined>(undefined)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     getManifest()
       // Charts expect oldest-to-newest; the manifest lists newest first.
-      .then((manifest) => [...manifest.dates].sort())
-      .then((sorted) => {
-        setDates(sorted)
-        return getDailySummaries(sorted)
+      .then((manifest) => {
+        setUpdatedAt(manifest.updatedAt)
+        const sorted = [...manifest.dates].sort()
+        return Promise.all([getDailySummaries(sorted), getHeartRateSummaries(sorted)])
       })
-      .then(setSummaries)
+      .then(([daily, hr]) => {
+        setSummaries(daily)
+        setHrSummaries(hr)
+      })
       .catch((e) => setError(String(e)))
     getActivities()
       .then(setActivities)
@@ -37,94 +55,130 @@ function App() {
     () => summaries.map((s) => ({ date: s.date.slice(5), steps: s.steps })),
     [summaries],
   )
-  const weeklyTotal = useMemo(() => sumSteps(summaries), [summaries])
-  const progressValue = WEEKLY_STEPS_TARGET > 0 ? (100 * weeklyTotal) / WEEKLY_STEPS_TARGET : 0
+  const hrPoints = useMemo(
+    () =>
+      hrSummaries.map((h) => ({
+        date: h.date.slice(5),
+        resting: h.restingHeartRate,
+        avg: h.avgHeartRate,
+      })),
+    [hrSummaries],
+  )
+  const kpis = useMemo(() => buildKpis(summaries, hrSummaries), [summaries, hrSummaries])
+  const headline = useMemo(() => buildHeadline(summaries, hrSummaries), [summaries, hrSummaries])
+  const goal = useMemo(() => weeklyGoal(summaries, WEEKLY_STEPS_TARGET), [summaries])
+
+  const recentActivities = useMemo(
+    () =>
+      [...(activities ?? [])]
+        .sort((a, b) => b.startTimeLocal.localeCompare(a.startTimeLocal))
+        .slice(0, 6),
+    [activities],
+  )
+
+  const ready = summaries.length > 0
+  const updatedLabel = formatUpdatedAt(updatedAt)
 
   return (
-    <div className="min-h-dvh">
-      <div className="mx-auto max-w-6xl p-6">
-        <div className="mb-6 flex items-center justify-between">
+    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-10">
+      {/* Header */}
+      <header className="mb-8 flex items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <span className="relative flex h-2.5 w-2.5">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-60" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-primary" />
+          </span>
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">Garmin Dashboard</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Overview of your recent activity, steps and heart rate.</p>
+            <h1 className="text-xl font-bold tracking-tight sm:text-2xl">Garmin</h1>
+            <p className="text-xs text-muted-foreground sm:text-sm">
+              Activity overview{updatedLabel ? ` · updated ${updatedLabel}` : ''}
+            </p>
           </div>
-          <ThemeToggle />
         </div>
+        <ThemeToggle />
+      </header>
 
-        {error && (
-          <div className="mb-4 rounded-md border border-red-300 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-950 dark:text-red-300">{error}</div>
-        )}
+      {error && (
+        <div className="mb-6 rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+          {error}
+        </div>
+      )}
 
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          <Card className="md:col-span-2">
+      <div className="space-y-6">
+        {/* Story */}
+        <InsightBanner headline={headline.headline} detail={headline.detail} />
+
+        {/* KPI row */}
+        <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {kpis.map((kpi, i) => (
+            <StatCard key={kpi.key} kpi={kpi} index={i} />
+          ))}
+        </section>
+
+        {/* Charts */}
+        <section className="grid gap-6 lg:grid-cols-2">
+          <Card>
             <CardHeader>
               <CardTitle>Steps</CardTitle>
-              <CardDescription>Recent days</CardDescription>
+              <CardDescription>
+                Daily steps over {summaries.length} days vs a {DAILY_STEPS_GOAL.toLocaleString()} goal
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <StepsChart data={stepsPoints} />
+              {ready ? (
+                <StepsChart data={stepsPoints} goal={DAILY_STEPS_GOAL} />
+              ) : (
+                <ChartSkeleton />
+              )}
             </CardContent>
           </Card>
 
           <Card>
+            <CardHeader>
+              <CardTitle>Heart Rate</CardTitle>
+              <CardDescription>Resting vs daily average (bpm)</CardDescription>
+            </CardHeader>
+            <CardContent>{ready ? <HeartRateChart data={hrPoints} /> : <ChartSkeleton />}</CardContent>
+          </Card>
+        </section>
+
+        {/* Goal + activities */}
+        <section className="grid gap-6 lg:grid-cols-3">
+          <Card className="lg:col-span-1">
             <CardHeader>
               <CardTitle>Weekly Goal</CardTitle>
               <CardDescription>{WEEKLY_STEPS_TARGET.toLocaleString()} steps</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="mb-2 flex items-center justify-between text-sm">
-                <span>Progress</span>
-                <Badge>{Math.round(progressValue)}%</Badge>
-              </div>
-              <Progress value={Math.min(progressValue, 100)} />
-              <Separator className="my-4" />
-              <div className="text-sm text-gray-500 dark:text-gray-400">
-                {weeklyTotal.toLocaleString()} of {WEEKLY_STEPS_TARGET.toLocaleString()} steps across {summaries.length} day{summaries.length === 1 ? '' : 's'}.
-              </div>
+            <CardContent className="flex justify-center pt-2">
+              <GoalRing {...goal} />
             </CardContent>
           </Card>
 
-          <Card className="md:col-span-2">
-            <CardHeader>
-              <CardTitle>Heart Rate</CardTitle>
-              <CardDescription>Resting vs average</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <HeartRateChart dates={dates} />
-            </CardContent>
-          </Card>
-
-          <Card>
+          <Card className="lg:col-span-2">
             <CardHeader>
               <CardTitle>Recent Activities</CardTitle>
-              <CardDescription>From activities.json</CardDescription>
+              <CardDescription>Latest workouts and sessions</CardDescription>
             </CardHeader>
             <CardContent>
-              {!activities && (
-                <div className="text-sm text-gray-500">No data loaded.</div>
-              )}
-              {activities && (
-                <ul className="divide-y divide-gray-200 dark:divide-gray-800">
-                  {activities.map((a) => (
-                    <li key={a.id} className="flex items-center justify-between py-3 text-sm">
-                      <div className="min-w-0">
-                        <div className="truncate font-medium">{a.name}</div>
-                        <div className="truncate text-gray-500 dark:text-gray-400">{new Date(a.startTimeLocal).toLocaleString()}</div>
-                      </div>
-                      <div className="ml-3 shrink-0 text-right text-gray-500 dark:text-gray-400">
-                        {a.distanceKm ? `${a.distanceKm.toFixed(1)} km` : ''}
-                        {a.avgHr ? ` · ${a.avgHr} bpm` : ''}
-                      </div>
-                    </li>
+              {recentActivities.length === 0 ? (
+                <div className="py-8 text-center text-sm text-muted-foreground">No activities yet.</div>
+              ) : (
+                <ul className="divide-y divide-border">
+                  {recentActivities.map((a) => (
+                    <ActivityItem key={a.id} activity={a} />
                   ))}
                 </ul>
               )}
             </CardContent>
           </Card>
-        </div>
+        </section>
       </div>
     </div>
   )
+}
+
+function ChartSkeleton() {
+  return <div className="h-64 w-full animate-pulse rounded-md bg-muted/50" />
 }
 
 export default App

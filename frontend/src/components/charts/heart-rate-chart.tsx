@@ -1,56 +1,61 @@
-import { useEffect, useState } from 'react'
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from 'recharts'
-import { getHeartRateSummary } from '../../features/garmin/data'
+import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from 'recharts'
+import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart'
 
-type Point = { date: string; resting?: number; avg?: number }
+export type HeartRatePoint = { date: string; resting?: number; avg?: number }
 
-export function HeartRateChart({ dates }: { dates: string[] }) {
-  const [data, setData] = useState<Point[]>([])
-  const [error, setError] = useState<string | null>(null)
+const config: ChartConfig = {
+  resting: { label: 'Resting', color: 'hsl(var(--chart-3))' },
+  avg: { label: 'Average', color: 'hsl(var(--chart-2))' },
+}
 
-  useEffect(() => {
-    Promise.all(
-      dates.map(async (d) => {
-        try {
-          const summary = await getHeartRateSummary(d)
-          return { date: d.slice(5), resting: summary.restingHeartRate, avg: summary.avgHeartRate }
-        } catch {
-          // Leave the point's values undefined so recharts renders a gap rather than a fake zero.
-          return { date: d.slice(5) }
-        }
-      }),
-    )
-      .then(setData)
-      .catch((e) => setError(String(e)))
-  }, [dates])
-
-  if (error) return <div className="text-red-600 text-sm">{error}</div>
-
+export function HeartRateChart({ data }: { data: HeartRatePoint[] }) {
   const hasValues = data.some((p) => p.resting != null || p.avg != null)
   if (!hasValues) {
-    return <div className="flex h-60 items-center justify-center text-sm text-gray-500">No heart rate data available.</div>
+    return (
+      <div className="flex h-64 items-center justify-center text-sm text-muted-foreground">
+        No heart rate data available.
+      </div>
+    )
   }
 
   return (
-    <div className="h-60">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ left: 8, right: 8, top: 8, bottom: 8 }}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" />
-          <YAxis />
-          <Tooltip />
-          <Line type="monotone" dataKey="resting" stroke="#16a34a" dot={false} name="Resting" />
-          <Line type="monotone" dataKey="avg" stroke="#ef4444" dot={false} name="Avg" />
-        </LineChart>
-      </ResponsiveContainer>
-    </div>
+    <ChartContainer config={config} className="aspect-auto h-64 w-full">
+      <LineChart data={data} margin={{ left: 4, right: 12, top: 8, bottom: 4 }}>
+        <CartesianGrid vertical={false} strokeDasharray="3 3" />
+        <XAxis
+          dataKey="date"
+          tickLine={false}
+          axisLine={false}
+          tickMargin={8}
+          minTickGap={28}
+          fontSize={11}
+        />
+        <YAxis width={32} tickLine={false} axisLine={false} fontSize={11} domain={['dataMin - 4', 'dataMax + 4']} />
+        <Tooltip
+          cursor={{ stroke: 'hsl(var(--border))' }}
+          content={<ChartTooltipContent valueFormatter={(v) => `${v} bpm`} />}
+        />
+        <Line
+          type="monotone"
+          dataKey="resting"
+          name="Resting"
+          stroke="var(--color-resting)"
+          strokeWidth={2.5}
+          dot={false}
+          activeDot={{ r: 4 }}
+          connectNulls
+        />
+        <Line
+          type="monotone"
+          dataKey="avg"
+          name="Average"
+          stroke="var(--color-avg)"
+          strokeWidth={2.5}
+          dot={false}
+          activeDot={{ r: 4 }}
+          connectNulls
+        />
+      </LineChart>
+    </ChartContainer>
   )
 }
