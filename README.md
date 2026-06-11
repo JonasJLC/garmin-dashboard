@@ -28,9 +28,12 @@ Common commands:
 ```bash
 pnpm lint
 pnpm typecheck
+pnpm test
 pnpm build
 pnpm preview
 ```
+
+`pnpm-lock.yaml` is committed; CI installs with `--frozen-lockfile`, so run `pnpm install` after changing dependencies to keep the lockfile in sync.
 
 Tailwind is configured in `frontend/tailwind.config.ts`. Shared UI primitives live under `frontend/src/components/ui/`.
 
@@ -47,13 +50,29 @@ export GARMIN_PASSWORD="<your-password>"
 uv run python scripts/pull_garmin_data.py
 ```
 
+By default the fetcher backfills the last 7 days; set `GARMIN_DAYS` to change that.
+
 Outputs are written to `frontend/public/data/garmin/`:
 
 - `daily-YYYY-MM-DD.json`
 - `hr-YYYY-MM-DD.json`
 - `activities.json`
+- `index.json` — manifest of available dates; the frontend reads this to know which days to load.
 
 See `AGENTS.md` and `backend/README.md` for the Garmin authentication flow and backend details.
+
+## Automated Refresh
+
+`.github/workflows/refresh-data.yml` can refresh the snapshots on a weekly schedule (or via manual
+dispatch). Garmin's interactive MFA cannot run headlessly, so the workflow authenticates with a saved
+`garth` token supplied as the `GARMINTOKENS` repository secret (see `backend/README.md`). Without that
+secret the workflow fails fast rather than committing stale data.
+
+## Privacy
+
+This project commits personal health data as JSON and publishes it to a public GitHub Pages site, where
+it also remains in git history. If that is not intended, keep this source repository private, point the
+deploy at a private host, or aggregate/anonymize the data before committing.
 
 ## Data Flow
 
