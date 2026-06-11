@@ -1,6 +1,6 @@
 [project]
 name = "garmin-backend"
-version = "0.1.0"
+version = "0.1.1"
 description = "Local data fetcher for Garmin, writes JSON for frontend"
 requires-python = ">=3.14"
 dependencies = [
@@ -11,7 +11,4 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = [
-    "ruff>=0.14.1",
-    "ty>=0.0.1a23",
-]
+dev = ["ruff", "ty"]
