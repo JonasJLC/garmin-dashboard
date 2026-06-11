@@ -1,6 +1,6 @@
 import './App.css'
-import { useEffect, useMemo, useState } from 'react'
-import { getActivities } from './features/garmin/data'
+import { useEffect, useState } from 'react'
+import { getActivities, getManifest } from './features/garmin/data'
 import { StepsChart } from './components/charts/steps-chart'
 import { HeartRateChart } from './components/charts/heart-rate-chart'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
@@ -21,15 +21,18 @@ type Activity = {
 
 function App() {
   const [activities, setActivities] = useState<Activity[] | null>(null)
+  const [dates, setDates] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    getManifest()
+      // Charts expect oldest-to-newest; the manifest lists newest first.
+      .then((manifest) => setDates([...manifest.dates].sort()))
+      .catch((e) => setError(String(e)))
     getActivities()
       .then(setActivities)
       .catch((e) => setError(String(e)))
   }, [])
-
-  const dates = useMemo(() => ['2025-10-16','2025-10-17','2025-10-18','2025-10-19','2025-10-20'], [])
 
   const weeklyStepsTarget = 60000
   const progressValue = 100 * (/* naive sum from chart mock values */ (8421+10934+7032+12680+9342) / weeklyStepsTarget)

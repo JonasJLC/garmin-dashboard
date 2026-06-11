@@ -3,9 +3,11 @@ import {
   ActivitiesSchema,
   DailySummarySchema,
   HeartRateSummarySchema,
+  ManifestSchema,
   type Activity,
   type DailySummary,
   type HeartRateSummary,
+  type Manifest,
 } from './schemas'
 
 async function loadJson<T>(path: string, schema: z.ZodType<T>): Promise<T> {
@@ -20,7 +22,11 @@ async function loadJson<T>(path: string, schema: z.ZodType<T>): Promise<T> {
   return parsed.data
 }
 
-const base = (import.meta as any).env?.BASE_URL ?? '/'
+const base = import.meta.env.BASE_URL ?? '/'
+
+export function getManifest(): Promise<Manifest> {
+  return loadJson(`${base}data/garmin/index.json`, ManifestSchema)
+}
 
 export function getDailySummary(date: string): Promise<DailySummary> {
   return loadJson(`${base}data/garmin/daily-${date}.json`, DailySummarySchema)
