@@ -24,18 +24,18 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          node-version: '20'
+
+      - name: Enable pnpm
+        run: corepack enable
 
       - name: Install dependencies
         working-directory: frontend
-        run: npm ci
+        run: pnpm install --no-frozen-lockfile
 
       - name: Build
         working-directory: frontend
-        run: npm run build
-        # if your output is dist/, update the copy step accordingly
+        run: pnpm build
 
       - name: Checkout target user site repo
         uses: actions/checkout@v4
@@ -53,7 +53,6 @@ jobs:
 
       - name: Copy build into user site
         run: |
-          # Adjust 'build' to your output folder (e.g., 'dist' for Vite)
           rsync -a --delete ./frontend/dist/ site/garmin-dashboard/
 
       - name: Configure git user
