@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import {
   LineChart,
   Line,
@@ -8,30 +7,13 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
-import { getDailySummary } from '../../features/garmin/data'
 
-type Point = { date: string; steps: number }
+export type StepsPoint = { date: string; steps: number }
 
-export function StepsChart({ dates }: { dates: string[] }) {
-  const [data, setData] = useState<Point[]>([])
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    Promise.all(
-      dates.map(async (d) => {
-        try {
-          const summary = await getDailySummary(d)
-          return { date: d.slice(5), steps: summary.steps }
-        } catch (e) {
-          return { date: d.slice(5), steps: 0 }
-        }
-      }),
-    )
-      .then(setData)
-      .catch((e) => setError(String(e)))
-  }, [dates])
-
-  if (error) return <div className="text-red-600 text-sm">{error}</div>
+export function StepsChart({ data }: { data: StepsPoint[] }) {
+  if (data.length === 0) {
+    return <div className="flex h-60 items-center justify-center text-sm text-gray-500">No step data available.</div>
+  }
   return (
     <div className="h-60">
       <ResponsiveContainer width="100%" height="100%">
@@ -46,5 +28,3 @@ export function StepsChart({ dates }: { dates: string[] }) {
     </div>
   )
 }
-
-

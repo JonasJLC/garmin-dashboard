@@ -1,6 +1,7 @@
 import './App.css'
-import { useEffect, useState } from 'react'
-import { getActivities, getManifest } from './features/garmin/data'
+import { useEffect, useMemo, useState } from 'react'
+import { getActivities, getDailySummaries, getManifest, sumSteps } from './features/garmin/data'
+import type { Activity, DailySummary } from './features/garmin/schemas'
 import { StepsChart } from './components/charts/steps-chart'
 import { HeartRateChart } from './components/charts/heart-rate-chart'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
@@ -9,33 +10,35 @@ import { Badge } from './components/ui/badge'
 import { Progress } from './components/ui/progress'
 import { ThemeToggle } from './components/ui/theme-toggle'
 
-type Activity = {
-  id: number
-  name: string
-  startTimeLocal: string
-  durationSec: number
-  distanceKm?: number
-  avgHr?: number
-  type?: string
-}
+const WEEKLY_STEPS_TARGET = 60000
 
 function App() {
   const [activities, setActivities] = useState<Activity[] | null>(null)
   const [dates, setDates] = useState<string[]>([])
+  const [summaries, setSummaries] = useState<DailySummary[]>([])
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     getManifest()
       // Charts expect oldest-to-newest; the manifest lists newest first.
-      .then((manifest) => setDates([...manifest.dates].sort()))
+      .then((manifest) => [...manifest.dates].sort())
+      .then((sorted) => {
+        setDates(sorted)
+        return getDailySummaries(sorted)
+      })
+      .then(setSummaries)
       .catch((e) => setError(String(e)))
     getActivities()
       .then(setActivities)
       .catch((e) => setError(String(e)))
   }, [])
 
-  const weeklyStepsTarget = 60000
-  const progressValue = 100 * (/* naive sum from chart mock values */ (8421+10934+7032+12680+9342) / weeklyStepsTarget)
+  const stepsPoints = useMemo(
+    () => summaries.map((s) => ({ date: s.date.slice(5), steps: s.steps })),
+    [summaries],
+  )
+  const weeklyTotal = useMemo(() => sumSteps(summaries), [summaries])
+  const progressValue = WEEKLY_STEPS_TARGET > 0 ? (100 * weeklyTotal) / WEEKLY_STEPS_TARGET : 0
 
   return (
     <div className="min-h-dvh">
@@ -56,33 +59,35 @@ function App() {
           <Card className="md:col-span-2">
             <CardHeader>
               <CardTitle>Steps</CardTitle>
-              <CardDescription>Last 5 days</CardDescription>
+              <CardDescription>Recent days</CardDescription>
             </CardHeader>
             <CardContent>
-              <StepsChart dates={dates} />
+              <StepsChart data={stepsPoints} />
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
               <CardTitle>Weekly Goal</CardTitle>
-              <CardDescription>60,000 steps</CardDescription>
+              <CardDescription>{WEEKLY_STEPS_TARGET.toLocaleString()} steps</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="mb-2 flex items-center justify-between text-sm">
                 <span>Progress</span>
                 <Badge>{Math.round(progressValue)}%</Badge>
               </div>
-              <Progress value={progressValue} />
+              <Progress value={Math.min(progressValue, 100)} />
               <Separator className="my-4" />
-              <div className="text-sm text-gray-500 dark:text-gray-400">Data shown from mock files under <code>public/data/garmin</code>.</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                {weeklyTotal.toLocaleString()} of {WEEKLY_STEPS_TARGET.toLocaleString()} steps across {summaries.length} day{summaries.length === 1 ? '' : 's'}.
+              </div>
             </CardContent>
           </Card>
 
           <Card className="md:col-span-2">
             <CardHeader>
               <CardTitle>Heart Rate</CardTitle>
-              <CardDescription>Resting vs average (last 5 days)</CardDescription>
+              <CardDescription>Resting vs average</CardDescription>
             </CardHeader>
             <CardContent>
               <HeartRateChart dates={dates} />

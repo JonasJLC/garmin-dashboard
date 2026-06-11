@@ -40,4 +40,17 @@ export function getActivities(): Promise<Activity[]> {
   return loadJson(`${base}data/garmin/activities.json`, ActivitiesSchema)
 }
 
+// Load summaries for many dates, keeping only the ones that resolve so a single
+// missing/invalid day does not blank the whole dashboard. Order follows `dates`.
+export async function getDailySummaries(dates: string[]): Promise<DailySummary[]> {
+  const results = await Promise.allSettled(dates.map(getDailySummary))
+  return results
+    .filter((r): r is PromiseFulfilledResult<DailySummary> => r.status === 'fulfilled')
+    .map((r) => r.value)
+}
+
+export function sumSteps(summaries: Pick<DailySummary, 'steps'>[]): number {
+  return summaries.reduce((total, s) => total + s.steps, 0)
+}
+
 

@@ -22,7 +22,8 @@ export function HeartRateChart({ dates }: { dates: string[] }) {
         try {
           const summary = await getHeartRateSummary(d)
           return { date: d.slice(5), resting: summary.restingHeartRate, avg: summary.avgHeartRate }
-        } catch (e) {
+        } catch {
+          // Leave the point's values undefined so recharts renders a gap rather than a fake zero.
           return { date: d.slice(5) }
         }
       }),
@@ -32,6 +33,12 @@ export function HeartRateChart({ dates }: { dates: string[] }) {
   }, [dates])
 
   if (error) return <div className="text-red-600 text-sm">{error}</div>
+
+  const hasValues = data.some((p) => p.resting != null || p.avg != null)
+  if (!hasValues) {
+    return <div className="flex h-60 items-center justify-center text-sm text-gray-500">No heart rate data available.</div>
+  }
+
   return (
     <div className="h-60">
       <ResponsiveContainer width="100%" height="100%">
@@ -47,5 +54,3 @@ export function HeartRateChart({ dates }: { dates: string[] }) {
     </div>
   )
 }
-
-
