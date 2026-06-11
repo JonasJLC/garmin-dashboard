@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 # heartRateValues entries are [timestamp, bpm] pairs.
 _HR_PAIR_LEN = 2
 
-_MISSING_CREDS = "Set GARMIN_EMAIL and GARMIN_PASSWORD env vars."
+_MISSING_CREDS = "Set GARMINTOKENS, or both GARMIN_EMAIL and GARMIN_PASSWORD."
 
 
 def repo_root() -> Path:
@@ -105,14 +105,18 @@ def main() -> None:
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
 
-    email = os.getenv("GARMIN_EMAIL")
-    password = os.getenv("GARMIN_PASSWORD")
-    if not email or not password:
-        raise SystemExit(_MISSING_CREDS)
-
     days = int(os.getenv("GARMIN_DAYS", "7"))
 
-    client = Garmin(email, password)
+    # Prefer a saved garth token (GARMINTOKENS) for headless/CI use; login()
+    # reads that env var itself. Fall back to email/password for interactive use.
+    if os.getenv("GARMINTOKENS"):
+        client = Garmin()
+    else:
+        email = os.getenv("GARMIN_EMAIL")
+        password = os.getenv("GARMIN_PASSWORD")
+        if not email or not password:
+            raise SystemExit(_MISSING_CREDS)
+        client = Garmin(email, password)
     client.login()
 
     today = date.today()  # noqa: DTZ011 - calendar day for Garmin's local-date API
