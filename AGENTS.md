@@ -97,6 +97,19 @@ docs(readme): update setup instructions
 - Clarify Garmin data fetch workflow
 ```
 
+## Final Response Format
+
+Whenever a coding agent changes files, the final output must end with a copy-paste-ready conventional git commit message in this format:
+
+```text
+docs(readme): update setup instructions
+
+- Switch frontend commands to pnpm
+- Clarify Garmin data fetch workflow
+```
+
+Choose the conventional commit type and scope from the actual change, such as `docs(readme)`, `docs(agents)`, `chore(config)`, `fix(frontend)`, or `chore(data)`. Keep the subject concise and use bullet points for the concrete changes.
+
 ## Deployment
 
 The frontend builds to `frontend/dist`.

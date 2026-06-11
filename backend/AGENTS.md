@@ -73,6 +73,16 @@ The script writes snapshots to `../frontend/public/data/garmin/`:
 - Keep generated JSON snapshots under `frontend/public/data/garmin/`.
 - Use `uv` rather than direct `pip` commands.
 - Use conventional commit messages, for example `chore(data): update garmin snapshots`.
+- Whenever a coding agent changes files, its final output must end with a copy-paste-ready conventional git commit message using a concise subject and bullet body.
+
+Example final commit message:
+
+```text
+chore(data): update garmin snapshots
+
+- Refresh Garmin JSON data files
+- Keep generated snapshots under frontend public data
+```
 
 ## Reference
 
