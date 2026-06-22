@@ -19,12 +19,10 @@ from __future__ import annotations
 
 import random
 from datetime import date, timedelta
-from typing import TYPE_CHECKING, Any
+from pathlib import Path
+from typing import Any
 
 from pull_garmin_data import build_manifest, data_dir, write_json
-
-if TYPE_CHECKING:
-    from pathlib import Path
 
 _DAYS = 30
 _END = date(2025, 10, 20)

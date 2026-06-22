@@ -1,5 +1,5 @@
-import { CartesianGrid, Line, LineChart, Tooltip, XAxis, YAxis } from 'recharts'
-import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart'
+import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { ChartTooltipContent, type ChartConfig } from '@/components/ui/chart'
 
 export type HeartRatePoint = { date: string; resting?: number; avg?: number }
 
@@ -19,7 +19,7 @@ export function HeartRateChart({ data }: { data: HeartRatePoint[] }) {
   }
 
   return (
-    <ChartContainer config={config} className="aspect-auto h-64 w-full">
+    <ResponsiveContainer width="100%" height={256} className="text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/40 [&_.recharts-surface]:outline-none">
       <LineChart data={data} margin={{ left: 4, right: 12, top: 8, bottom: 4 }}>
         <CartesianGrid vertical={false} strokeDasharray="3 3" />
         <XAxis
@@ -33,13 +33,13 @@ export function HeartRateChart({ data }: { data: HeartRatePoint[] }) {
         <YAxis width={32} tickLine={false} axisLine={false} fontSize={11} domain={['dataMin - 4', 'dataMax + 4']} />
         <Tooltip
           cursor={{ stroke: 'hsl(var(--border))' }}
-          content={<ChartTooltipContent valueFormatter={(v) => `${v} bpm`} />}
+          content={<ChartTooltipContent config={config} valueFormatter={(v) => `${v} bpm`} />}
         />
         <Line
           type="monotone"
           dataKey="resting"
           name="Resting"
-          stroke="var(--color-resting)"
+          stroke={config.resting.color}
           strokeWidth={2.5}
           dot={false}
           activeDot={{ r: 4 }}
@@ -49,13 +49,13 @@ export function HeartRateChart({ data }: { data: HeartRatePoint[] }) {
           type="monotone"
           dataKey="avg"
           name="Average"
-          stroke="var(--color-avg)"
+          stroke={config.avg.color}
           strokeWidth={2.5}
           dot={false}
           activeDot={{ r: 4 }}
           connectNulls
         />
       </LineChart>
-    </ChartContainer>
+    </ResponsiveContainer>
   )
 }

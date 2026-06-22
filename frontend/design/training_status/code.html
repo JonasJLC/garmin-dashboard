@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Apex Performance | Training Status</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "on-surface-variant": "#e2bfb0",
+                "secondary-container": "#00cb65",
+                "on-primary-fixed-variant": "#7a3000",
+                "on-error-container": "#ffdad6",
+                "on-secondary-container": "#004f23",
+                "surface-variant": "#353534",
+                "background": "#121212",
+                "on-tertiary": "#002e69",
+                "surface-container-highest": "#353534",
+                "primary-fixed": "#ffdbcc",
+                "primary": "#ffb693",
+                "error-container": "#93000a",
+                "surface-dim": "#131313",
+                "on-tertiary-fixed-variant": "#004493",
+                "on-secondary-fixed": "#00210b",
+                "surface-container-low": "#1c1b1b",
+                "on-primary-fixed": "#351000",
+                "on-tertiary-container": "#002f6a",
+                "outline": "#a98a7d",
+                "surface-tint": "#ffb693",
+                "on-tertiary-fixed": "#001a41",
+                "on-secondary-fixed-variant": "#005225",
+                "surface-container-high": "#242424",
+                "on-secondary": "#003918",
+                "secondary-fixed": "#63ff94",
+                "secondary": "#3fe87e",
+                "surface-bright": "#393939",
+                "inverse-on-surface": "#313030",
+                "surface-container": "#1A1A1A",
+                "on-background": "#e5e2e1",
+                "error": "#ffb4ab",
+                "on-error": "#690005",
+                "tertiary-fixed-dim": "#adc6ff",
+                "inverse-surface": "#e5e2e1",
+                "on-primary": "#561f00",
+                "tertiary-container": "#5d97ff",
+                "tertiary": "#adc6ff",
+                "surface": "#121212",
+                "surface-container-lowest": "#0e0e0e",
+                "tertiary-fixed": "#d8e2ff",
+                "on-surface": "#e5e2e1",
+                "inverse-primary": "#a04100",
+                "on-primary-container": "#572000",
+                "primary-fixed-dim": "#ffb693",
+                "primary-container": "#ff6b00",
+                "outline-variant": "#2D2D2D",
+                "secondary-fixed-dim": "#37e279"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.125rem",
+                "lg": "0.25rem",
+                "xl": "0.5rem",
+                "full": "0.75rem"
+            },
+            "spacing": {
+                "xl": "40px",
+                "xs": "4px",
+                "lg": "24px",
+                "sm": "8px",
+                "gutter": "16px",
+                "margin-desktop": "32px",
+                "md": "16px",
+                "unit": "4px",
+                "margin-mobile": "16px"
+            },
+            "fontFamily": {
+                "body-sm": ["Hanken Grotesk"],
+                "headline-lg-mobile": ["Hanken Grotesk"],
+                "headline-md": ["Hanken Grotesk"],
+                "headline-lg": ["Hanken Grotesk"],
+                "body-lg": ["Hanken Grotesk"],
+                "data-mono": ["JetBrains Mono"],
+                "display-metrics": ["Hanken Grotesk"],
+                "label-caps": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                "data-mono": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                "display-metrics": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .performance-gradient {
+            background: linear-gradient(180deg, #3fe87e 0%, #00cb65 100%);
+        }
+        .optimal-zone {
+            background: rgba(63, 232, 126, 0.1);
+            border-top: 1px dashed #3fe87e;
+            border-bottom: 1px dashed #3fe87e;
+        }
+        .dial-container {
+            position: relative;
+            width: 200px;
+            height: 100px;
+            overflow: hidden;
+        }
+        .dial-track {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 12px solid #2D2D2D;
+            border-bottom-color: transparent;
+            transform: rotate(-45deg);
+        }
+        .dial-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: 12px solid transparent;
+            border-top-color: #3fe87e;
+            border-right-color: #3fe87e;
+            transform: rotate(45deg);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-lg overflow-x-hidden">
+<!-- Top Navigation Shell -->
+<header class="w-full h-16 bg-background border-b border-outline-variant flex justify-between items-center px-gutter fixed top-0 z-50">
+<div class="text-headline-md font-headline-md font-bold tracking-tighter text-primary">APEX PERFORMANCE</div>
+<div class="hidden md:flex items-center space-x-lg h-full">
+<nav class="flex h-full">
+<a class="px-md flex items-center h-full text-primary font-bold transition-colors" href="#">Overview</a>
+<a class="px-md flex items-center h-full text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">Health</a>
+<a class="px-md flex items-center h-full text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">Training</a>
+<a class="px-md flex items-center h-full text-on-surface-variant hover:bg-surface-container-high transition-colors" href="#">Profile</a>
+</nav>
+</div>
+<div class="flex items-center space-x-md">
+<span class="material-symbols-outlined cursor-pointer text-on-surface-variant hover:text-primary transition-colors">sync</span>
+<span class="material-symbols-outlined cursor-pointer text-on-surface-variant hover:text-primary transition-colors">notifications</span>
+<span class="material-symbols-outlined cursor-pointer text-on-surface-variant hover:text-primary transition-colors">settings</span>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline">
+<img class="w-full h-full object-cover" data-alt="A professional close-up portrait of a determined elite marathon runner with subtle sweat on their brow, set against a dark, moody gym background with dramatic side lighting emphasizing athletic facial features. The lighting uses high-contrast cool tones and subtle orange highlights to match the brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6h60Y31cyIMl9ndNobTIa_cMQjKf6p6D75qHyfpi30mRUhUZBVUQTnOldsWiLn9h-eWCGcmWWjh29S66qtlGhSZCdGvxZSbWDrspJ5M0z4PgN7x5KwWG9Lllxmihy8pATqype6n9aJoSfn0BY6UkL2ciFs8UPqgt_974cgh3pFBmCS4rN7GB-FsvY6kvYHsOyjjOxLj_HgkPxgDmfhF41nHg7L7aUSOFZKwKuJxdjfXzt3PCRwzCTKvmP3xmwfokWykxIhezkbQE"/>
+</div>
+</div>
+</header>
+<!-- Side Navigation Shell (Desktop) -->
+<aside class="hidden md:flex flex-col h-screen w-64 fixed left-0 top-0 pt-20 pb-lg bg-surface-container-lowest border-r border-outline-variant">
+<div class="px-md mb-xl">
+<div class="flex items-center space-x-md p-md bg-surface-container-high border-l-4 border-primary">
+<span class="material-symbols-outlined text-primary">dashboard</span>
+<span class="text-label-caps font-label-caps text-primary">OVERVIEW</span>
+</div>
+<div class="flex items-center space-x-md p-md text-on-surface-variant hover:bg-surface-container transition-all cursor-pointer">
+<span class="material-symbols-outlined">monitor_heart</span>
+<span class="text-label-caps font-label-caps">HEALTH</span>
+</div>
+<div class="flex items-center space-x-md p-md text-on-surface-variant hover:bg-surface-container transition-all cursor-pointer">
+<span class="material-symbols-outlined">fitness_center</span>
+<span class="text-label-caps font-label-caps">TRAINING</span>
+</div>
+<div class="flex items-center space-x-md p-md text-on-surface-variant hover:bg-surface-container transition-all cursor-pointer">
+<span class="material-symbols-outlined">person</span>
+<span class="text-label-caps font-label-caps">PROFILE</span>
+</div>
+</div>
+<div class="mt-auto px-md space-y-sm">
+<button class="w-full py-md bg-primary-container text-on-primary-container font-bold rounded-lg flex items-center justify-center space-x-sm active:scale-95 duration-150">
+<span class="material-symbols-outlined">play_arrow</span>
+<span>Start Activity</span>
+</button>
+<div class="flex items-center space-x-md p-md text-on-surface-variant hover:text-on-surface transition-all cursor-pointer">
+<span class="material-symbols-outlined">help</span>
+<span class="text-label-caps font-label-caps">SUPPORT</span>
+</div>
+<div class="flex items-center space-x-md p-md text-on-surface-variant hover:text-on-surface transition-all cursor-pointer">
+<span class="material-symbols-outlined">logout</span>
+<span class="text-label-caps font-label-caps">LOG OUT</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="md:ml-64 pt-20 px-gutter pb-xl min-h-screen">
+<!-- Dashboard Header -->
+<div class="mb-lg">
+<h1 class="text-headline-lg font-headline-lg text-on-surface">Training Status</h1>
+<p class="text-body-lg text-on-surface-variant">Your current training load and efficiency metrics.</p>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Main Feature: Training Status & VO2 Max -->
+<section class="lg:col-span-8 bg-surface-container border border-outline-variant p-lg rounded-lg flex flex-col md:flex-row items-center justify-between">
+<div class="flex-1 space-y-md">
+<span class="text-label-caps font-label-caps text-secondary">PRODUCTIVE</span>
+<h2 class="text-display-metrics font-display-metrics text-on-surface">Productive</h2>
+<p class="text-body-lg text-on-surface-variant max-w-md">Your training load is at a level that is improving your fitness and performance. Keep it up.</p>
+<div class="flex space-x-lg pt-md">
+<div>
+<span class="text-label-caps font-label-caps text-on-surface-variant block">RECOVERY</span>
+<span class="text-headline-md font-headline-md text-secondary">22 Hours</span>
+</div>
+<div>
+<span class="text-label-caps font-label-caps text-on-surface-variant block">LOAD TREND</span>
+<span class="text-headline-md font-headline-md text-secondary">Stable</span>
+</div>
+</div>
+</div>
+<div class="mt-lg md:mt-0 flex flex-col items-center">
+<span class="text-label-caps font-label-caps text-on-surface-variant mb-sm">VO2 MAX</span>
+<div class="dial-container">
+<div class="dial-track"></div>
+<div class="dial-progress"></div>
+<div class="absolute bottom-0 left-1/2 -translate-x-1/2 text-center pb-xs">
+<span class="text-display-metrics font-display-metrics text-on-surface block leading-none">54</span>
+<span class="text-label-caps font-label-caps text-secondary">SUPERIOR</span>
+</div>
+</div>
+<div class="w-full flex justify-between mt-sm text-label-caps font-label-caps text-on-surface-variant px-md">
+<span>Fair</span>
+<span>Good</span>
+<span>Elite</span>
+</div>
+</div>
+</section>
+<!-- Race Predictor -->
+<section class="lg:col-span-4 bg-surface-container border border-outline-variant p-lg rounded-lg">
+<div class="flex items-center justify-between mb-lg">
+<span class="text-label-caps font-label-caps text-on-surface-variant">RACE PREDICTOR</span>
+<span class="material-symbols-outlined text-on-surface-variant">trending_up</span>
+</div>
+<div class="space-y-md">
+<div class="flex justify-between items-center py-sm border-b border-outline-variant">
+<span class="text-body-lg text-on-surface-variant">5K</span>
+<span class="text-data-mono font-data-mono text-on-surface">18:42</span>
+</div>
+<div class="flex justify-between items-center py-sm border-b border-outline-variant">
+<span class="text-body-lg text-on-surface-variant">10K</span>
+<span class="text-data-mono font-data-mono text-on-surface">39:15</span>
+</div>
+<div class="flex justify-between items-center py-sm border-b border-outline-variant">
+<span class="text-body-lg text-on-surface-variant">Half Marathon</span>
+<span class="text-data-mono font-data-mono text-on-surface">1:26:40</span>
+</div>
+<div class="flex justify-between items-center py-sm">
+<span class="text-body-lg text-on-surface-variant">Full Marathon</span>
+<span class="text-data-mono font-data-mono text-on-surface">3:04:12</span>
+</div>
+</div>
+<div class="mt-lg p-md bg-surface-container-high rounded border border-outline-variant">
+<p class="text-body-sm text-on-surface-variant italic">Based on your current VO2 Max and training history over the last 4 weeks.</p>
+</div>
+</section>
+<!-- Acute Load Graph -->
+<section class="lg:col-span-6 bg-surface-container border border-outline-variant p-lg rounded-lg">
+<div class="flex items-center justify-between mb-lg">
+<div>
+<span class="text-label-caps font-label-caps text-on-surface-variant">ACUTE LOAD</span>
+<h3 class="text-headline-md font-headline-md text-on-surface">Optimal Range</h3>
+</div>
+<div class="text-right">
+<span class="text-display-metrics font-display-metrics text-secondary leading-none block">742</span>
+<span class="text-label-caps font-label-caps text-on-surface-variant">CURRENT</span>
+</div>
+</div>
+<div class="relative h-48 w-full mt-lg">
+<!-- Optimal Zone Overlay -->
+<div class="absolute top-12 bottom-12 left-0 right-0 optimal-zone"></div>
+<!-- Simplified Chart Visualization -->
+<div class="absolute inset-0 flex items-end justify-between px-sm space-x-sm">
+<div class="bg-outline-variant w-full h-24 rounded-t"></div>
+<div class="bg-outline-variant w-full h-32 rounded-t"></div>
+<div class="bg-outline-variant w-full h-28 rounded-t"></div>
+<div class="bg-outline-variant w-full h-40 rounded-t"></div>
+<div class="secondary-container w-full h-36 rounded-t shadow-[0_0_15px_rgba(0,203,101,0.3)]"></div>
+<div class="secondary-container w-full h-42 rounded-t shadow-[0_0_15px_rgba(0,203,101,0.3)]"></div>
+<div class="secondary-container w-full h-38 rounded-t shadow-[0_0_15px_rgba(0,203,101,0.3)]"></div>
+</div>
+</div>
+<div class="flex justify-between mt-md text-label-caps font-label-caps text-on-surface-variant">
+<span>MON</span>
+<span>TUE</span>
+<span>WED</span>
+<span>THU</span>
+<span>FRI</span>
+<span>SAT</span>
+<span>SUN</span>
+</div>
+</section>
+<!-- Load Focus Breakdown -->
+<section class="lg:col-span-6 bg-surface-container border border-outline-variant p-lg rounded-lg">
+<div class="flex items-center justify-between mb-lg">
+<span class="text-label-caps font-label-caps text-on-surface-variant">LOAD FOCUS</span>
+<span class="text-body-sm text-secondary">Balanced Focus</span>
+</div>
+<div class="space-y-xl">
+<!-- Anaerobic -->
+<div class="space-y-sm">
+<div class="flex justify-between items-end">
+<span class="text-body-lg text-on-surface font-bold">Anaerobic</span>
+<span class="text-data-mono font-data-mono text-on-surface-variant">240 / 300</span>
+</div>
+<div class="h-3 w-full bg-outline-variant rounded-full overflow-hidden flex">
+<div class="h-full bg-primary" style="width: 80%"></div>
+</div>
+<div class="flex justify-between text-label-caps font-label-caps text-on-surface-variant">
+<span>High Intensity</span>
+<span>Target Met</span>
+</div>
+</div>
+<!-- High Aerobic -->
+<div class="space-y-sm">
+<div class="flex justify-between items-end">
+<span class="text-body-lg text-on-surface font-bold">High Aerobic</span>
+<span class="text-data-mono font-data-mono text-on-surface-variant">512 / 600</span>
+</div>
+<div class="h-3 w-full bg-outline-variant rounded-full overflow-hidden flex">
+<div class="h-full tertiary-container" style="width: 85%"></div>
+</div>
+<div class="flex justify-between text-label-caps font-label-caps text-on-surface-variant">
+<span>Threshold/VO2</span>
+<span>Near Target</span>
+</div>
+</div>
+<!-- Low Aerobic -->
+<div class="space-y-sm">
+<div class="flex justify-between items-end">
+<span class="text-body-lg text-on-surface font-bold">Low Aerobic</span>
+<span class="text-data-mono font-data-mono text-on-surface-variant">890 / 800</span>
+</div>
+<div class="h-3 w-full bg-outline-variant rounded-full overflow-hidden flex">
+<div class="h-full secondary-container" style="width: 100%"></div>
+</div>
+<div class="flex justify-between text-label-caps font-label-caps text-on-surface-variant">
+<span>Base/Recovery</span>
+<span class="text-secondary">Surplus</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Bottom Floating Action Button (Mobile Only) -->
+<div class="md:hidden fixed bottom-20 right-gutter">
+<button class="w-14 h-14 performance-gradient text-background rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-3xl font-bold">add</span>
+</button>
+</div>
+</main>
+<!-- Bottom Navigation (Mobile Only) -->
+<footer class="md:hidden fixed bottom-0 w-full h-16 bg-surface-container-lowest flex justify-around items-center px-gutter z-50 border-t border-outline-variant">
+<div class="flex flex-col items-center text-primary">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-xs">Overview</span>
+</div>
+<div class="flex flex-col items-center text-on-surface-variant">
+<span class="material-symbols-outlined">monitor_heart</span>
+<span class="text-xs">Health</span>
+</div>
+<div class="flex flex-col items-center text-on-surface-variant">
+<span class="material-symbols-outlined">fitness_center</span>
+<span class="text-xs">Training</span>
+</div>
+<div class="flex flex-col items-center text-on-surface-variant">
+<span class="material-symbols-outlined">person</span>
+<span class="text-xs">Profile</span>
+</div>
+</footer>
+<script>
+        // Micro-interactions for performance feel
+        document.querySelectorAll('.active\\:scale-95').forEach(button => {
+            button.addEventListener('mousedown', () => {
+                button.style.transform = 'scale(0.95)';
+            });
+            button.addEventListener('mouseup', () => {
+                button.style.transform = 'scale(1)';
+            });
+            button.addEventListener('mouseleave', () => {
+                button.style.transform = 'scale(1)';
+            });
+        });
+
+        // Simple interactive load bar simulation
+        const bars = document.querySelectorAll('.bg-outline-variant.w-full');
+        bars.forEach((bar, index) => {
+            setTimeout(() => {
+                bar.style.transition = 'height 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+            }, 100 * index);
+        });
+    </script>
+</body></html>

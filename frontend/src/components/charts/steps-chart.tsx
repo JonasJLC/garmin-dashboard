@@ -6,8 +6,9 @@ import {
   Tooltip,
   XAxis,
   YAxis,
+  ResponsiveContainer,
 } from 'recharts'
-import { ChartContainer, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart'
+import { ChartTooltipContent, type ChartConfig } from '@/components/ui/chart'
 
 export type StepsPoint = { date: string; steps: number }
 
@@ -24,12 +25,12 @@ export function StepsChart({ data, goal }: { data: StepsPoint[]; goal?: number }
     )
   }
   return (
-    <ChartContainer config={config} className="aspect-auto h-64 w-full">
+    <ResponsiveContainer width="100%" height={256} className="text-xs [&_.recharts-cartesian-axis-tick_text]:fill-muted-foreground [&_.recharts-cartesian-grid_line[stroke='#ccc']]:stroke-border/40 [&_.recharts-surface]:outline-none">
       <AreaChart data={data} margin={{ left: 4, right: 12, top: 8, bottom: 4 }}>
         <defs>
           <linearGradient id="fill-steps" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="var(--color-steps)" stopOpacity={0.45} />
-            <stop offset="95%" stopColor="var(--color-steps)" stopOpacity={0.04} />
+            <stop offset="5%" stopColor={config.steps.color} stopOpacity={0.45} />
+            <stop offset="95%" stopColor={config.steps.color} stopOpacity={0.04} />
           </linearGradient>
         </defs>
         <CartesianGrid vertical={false} strokeDasharray="3 3" />
@@ -64,19 +65,19 @@ export function StepsChart({ data, goal }: { data: StepsPoint[]; goal?: number }
         <Tooltip
           cursor={{ stroke: 'hsl(var(--border))' }}
           content={
-            <ChartTooltipContent valueFormatter={(v) => Number(v).toLocaleString()} />
+            <ChartTooltipContent config={config} valueFormatter={(v) => Number(v).toLocaleString()} />
           }
         />
         <Area
           type="monotone"
           dataKey="steps"
-          stroke="var(--color-steps)"
+          stroke={config.steps.color}
           strokeWidth={2.5}
           fill="url(#fill-steps)"
           dot={false}
           activeDot={{ r: 4 }}
         />
       </AreaChart>
-    </ChartContainer>
+    </ResponsiveContainer>
   )
 }

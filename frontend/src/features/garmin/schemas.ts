@@ -29,8 +29,8 @@ export const ActivitySchema = z.object({
   name: z.string(),
   startTimeLocal: z.string(),
   durationSec: z.number().nonnegative(),
-  distanceKm: z.number().nonnegative().optional(),
-  avgHr: z.number().int().positive().optional(),
+  distanceKm: z.number().nonnegative().nullable().optional(),
+  avgHr: z.number().int().positive().nullable().optional(),
   type: z.string().optional(),
 })
 

@@ -18,7 +18,7 @@ function formatWhen(iso: string): string {
 
 export function ActivityItem({ activity }: { activity: Activity }) {
   const Icon = (activity.type && ICONS[activity.type]) || ActivityIcon
-  const pace = formatPace(activity.durationSec, activity.distanceKm)
+  const pace = formatPace(activity.durationSec, activity.distanceKm ?? undefined)
   const minutes = Math.round(activity.durationSec / 60)
 
   const stats = [

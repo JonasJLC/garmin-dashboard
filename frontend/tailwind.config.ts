@@ -1,12 +1,10 @@
 import type { Config } from 'tailwindcss'
-import tailwindcssAnimate from 'tailwindcss-animate'
 
 export default {
   darkMode: ['class'],
   content: [
     './index.html',
     './src/**/*.{ts,tsx}',
-    './src/components/**/*.{ts,tsx}',
   ],
   theme: {
     extend: {
@@ -75,7 +73,6 @@ export default {
       },
     },
   },
-  plugins: [tailwindcssAnimate],
+  plugins: [],
 } satisfies Config
-
 

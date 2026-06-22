@@ -2,7 +2,6 @@ import { Area, AreaChart, ResponsiveContainer } from 'recharts'
 import { ArrowDown, ArrowUp, Minus } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { cn } from '@/lib/utils'
 import type { KpiStat } from '@/features/garmin/insights'
 
 const ACCENTS: Record<string, string> = {
@@ -73,7 +72,7 @@ export function StatCard({ kpi, index = 0 }: { kpi: KpiStat; index?: number }) {
         <DeltaBadge deltaPct={kpi.deltaPct} goodWhen={kpi.goodWhen} />
       </div>
       <div className="mt-3 flex items-baseline gap-1.5">
-        <span className={cn('text-3xl font-bold tabular-nums tracking-tight')}>{kpi.display}</span>
+        <span className="text-3xl font-bold tabular-nums tracking-tight">{kpi.display}</span>
         <span className="text-sm text-muted-foreground">{kpi.unit}</span>
       </div>
       <div className="mt-3">
