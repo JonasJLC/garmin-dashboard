@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
   ActivitiesSchema,
+  BodyBatterySchema,
   DailySummarySchema,
   HeartRateSummarySchema,
   ManifestSchema,
+  SleepSummarySchema,
 } from './schemas'
 
 describe('ManifestSchema', () => {
@@ -39,5 +41,13 @@ describe('ActivitiesSchema', () => {
       { id: 1, name: 'Run', startTimeLocal: '2025-10-20T06:45:00', durationSec: 3120 },
     ])
     expect(parsed).toHaveLength(1)
+  })
+})
+
+describe('redesign schemas', () => {
+  it('bounds body battery and sleep scores', () => {
+    expect(BodyBatterySchema.parse({ date: '2025-10-20', level: 84 }).level).toBe(84)
+    expect(BodyBatterySchema.safeParse({ date: '2025-10-20', level: 101 }).success).toBe(false)
+    expect(SleepSummarySchema.parse({ date: '2025-10-20', score: 91 }).score).toBe(91)
   })
 })

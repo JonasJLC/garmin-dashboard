@@ -4,8 +4,8 @@ import { ChartTooltipContent, type ChartConfig } from '@/components/ui/chart'
 export type HeartRatePoint = { date: string; resting?: number; avg?: number }
 
 const config: ChartConfig = {
-  resting: { label: 'Resting', color: 'hsl(var(--chart-3))' },
-  avg: { label: 'Average', color: 'hsl(var(--chart-2))' },
+  resting: { label: 'Resting', color: '#adc6ff' },
+  avg: { label: 'Average', color: '#ffb4ab' },
 }
 
 export function HeartRateChart({ data }: { data: HeartRatePoint[] }) {
@@ -32,7 +32,7 @@ export function HeartRateChart({ data }: { data: HeartRatePoint[] }) {
         />
         <YAxis width={32} tickLine={false} axisLine={false} fontSize={11} domain={['dataMin - 4', 'dataMax + 4']} />
         <Tooltip
-          cursor={{ stroke: 'hsl(var(--border))' }}
+          cursor={{ stroke: '#2d2d2d' }}
           content={<ChartTooltipContent config={config} valueFormatter={(v) => `${v} bpm`} />}
         />
         <Line

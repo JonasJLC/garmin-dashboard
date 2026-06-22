@@ -1,12 +1,15 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
 import './index.css'
 import App from './App.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <div className="min-h-dvh bg-background text-foreground font-sans antialiased">
-      <App />
-    </div>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <div className="min-h-dvh bg-background text-on-background font-sans antialiased">
+        <App />
+      </div>
+    </BrowserRouter>
   </StrictMode>,
 )

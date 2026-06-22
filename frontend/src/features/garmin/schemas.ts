@@ -38,4 +38,54 @@ export type Activity = z.infer<typeof ActivitySchema>
 
 export const ActivitiesSchema = z.array(ActivitySchema)
 
+export const BodyBatterySchema = z.object({
+  date: z.string(),
+  level: z.number().int().min(0).max(100),
+  maxLevel: z.number().int().min(0).max(100).optional(),
+  drainRate: z.number().optional(),
+  stressAvg: z.number().int().min(0).max(100).optional(),
+})
+
+export type BodyBattery = z.infer<typeof BodyBatterySchema>
+
+export const BodyBatteryListSchema = z.array(BodyBatterySchema)
+
+export const SleepSummarySchema = z.object({
+  date: z.string(),
+  score: z.number().int().min(0).max(100).optional(),
+  totalMinutes: z.number().nonnegative().optional(),
+  deepMinutes: z.number().nonnegative().optional(),
+  lightMinutes: z.number().nonnegative().optional(),
+  remMinutes: z.number().nonnegative().optional(),
+})
+
+export type SleepSummary = z.infer<typeof SleepSummarySchema>
+
+export const SleepSummaryListSchema = z.array(SleepSummarySchema)
+
+export const BiometricSummarySchema = z.object({
+  date: z.string(),
+  spo2Pct: z.number().min(0).max(100).optional(),
+  respirationBrpm: z.number().positive().optional(),
+  vo2MaxMlKgMin: z.number().positive().optional(),
+  recoveryTimeHrs: z.number().nonnegative().optional(),
+})
+
+export type BiometricSummary = z.infer<typeof BiometricSummarySchema>
+
+export const BiometricSummaryListSchema = z.array(BiometricSummarySchema)
+
+export const TrainingLoadSchema = z.object({
+  date: z.string(),
+  acuteLoad: z.number().nonnegative().optional(),
+  chronicLoad: z.number().nonnegative().optional(),
+  anaerobicLoad: z.number().nonnegative().optional(),
+  highAerobicLoad: z.number().nonnegative().optional(),
+  lowAerobicLoad: z.number().nonnegative().optional(),
+  trainingStatus: z.string().optional(),
+})
+
+export type TrainingLoad = z.infer<typeof TrainingLoadSchema>
+
+export const TrainingLoadListSchema = z.array(TrainingLoadSchema)
 

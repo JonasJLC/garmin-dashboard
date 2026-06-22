@@ -1,4 +1,11 @@
-import type { DailySummary, HeartRateSummary } from './schemas'
+import type {
+  BiometricSummary,
+  BodyBattery,
+  DailySummary,
+  HeartRateSummary,
+  SleepSummary,
+  TrainingLoad,
+} from './schemas'
 import { sumSteps } from './data'
 
 const SPARK_WINDOW = 14
@@ -168,4 +175,67 @@ export function weeklyGoal(summaries: DailySummary[], target: number): WeeklyGoa
   const total = sumSteps(last7)
   const pct = target > 0 ? (100 * total) / target : 0
   return { total, target, pct, days: last7.length }
+}
+
+export type TrainingReadiness = {
+  score: number
+  label: string
+  fatigue: number
+  sleepHistory: number[]
+}
+
+export function buildTrainingReadiness(
+  bodyBattery: BodyBattery[],
+  sleep: SleepSummary[],
+): TrainingReadiness {
+  const latestBattery = bodyBattery.at(-1)?.level ?? 0
+  const sleepHistory = sleep.map((s) => s.score).filter((v): v is number => v != null).slice(-7)
+  const sleepScore = sleepHistory.length ? average(sleepHistory) : latestBattery
+  const score = Math.round(_clamp(latestBattery * 0.6 + sleepScore * 0.4, 0, 100))
+  const label = score >= 80 ? 'Ready' : score >= 60 ? 'Steady' : 'Recovery'
+  return { score, label, fatigue: 100 - score, sleepHistory }
+}
+
+export type TrainingStatus = {
+  label: string
+  acuteLoad7d: number
+  loadFocus: { anaerobic: number; highAerobic: number; lowAerobic: number }
+}
+
+export function buildTrainingStatus(load: TrainingLoad[]): TrainingStatus {
+  const last7 = load.slice(-7)
+  const latest = load.at(-1)
+  const sum = (key: 'acuteLoad' | 'anaerobicLoad' | 'highAerobicLoad' | 'lowAerobicLoad') =>
+    last7.reduce((total, day) => total + (day[key] ?? 0), 0)
+
+  return {
+    label: latest?.trainingStatus ?? 'No data',
+    acuteLoad7d: Math.round(sum('acuteLoad')),
+    loadFocus: {
+      anaerobic: Math.round(sum('anaerobicLoad')),
+      highAerobic: Math.round(sum('highAerobicLoad')),
+      lowAerobic: Math.round(sum('lowAerobicLoad')),
+    },
+  }
+}
+
+export type HealthKpis = {
+  spo2Pct: number | null
+  respirationBrpm: number | null
+  vo2MaxMlKgMin: number | null
+  recoveryTimeHrs: number | null
+}
+
+export function buildHealthKpis(bio: BiometricSummary[]): HealthKpis {
+  const latest = bio.at(-1)
+  return {
+    spo2Pct: latest?.spo2Pct ?? null,
+    respirationBrpm: latest?.respirationBrpm ?? null,
+    vo2MaxMlKgMin: latest?.vo2MaxMlKgMin ?? null,
+    recoveryTimeHrs: latest?.recoveryTimeHrs ?? null,
+  }
+}
+
+function _clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, value))
 }

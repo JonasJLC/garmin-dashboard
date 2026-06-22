@@ -19,7 +19,7 @@ export function GoalRing({ total, target, pct, days }: WeeklyGoal) {
             cy={SIZE / 2}
             r={RADIUS}
             fill="none"
-            stroke="hsl(var(--muted))"
+            stroke="#242424"
             strokeWidth={STROKE}
           />
           <circle
@@ -27,7 +27,7 @@ export function GoalRing({ total, target, pct, days }: WeeklyGoal) {
             cy={SIZE / 2}
             r={RADIUS}
             fill="none"
-            stroke="hsl(var(--primary))"
+            stroke="#ffb693"
             strokeWidth={STROKE}
             strokeLinecap="round"
             strokeDasharray={CIRCUMFERENCE}

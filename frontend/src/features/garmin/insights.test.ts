@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest'
-import { average, buildHeadline, buildKpis, formatPace, pctDelta, weeklyGoal } from './insights'
+import {
+  average,
+  buildHeadline,
+  buildKpis,
+  buildTrainingReadiness,
+  buildTrainingStatus,
+  formatPace,
+  pctDelta,
+  weeklyGoal,
+} from './insights'
 import type { DailySummary, HeartRateSummary } from './schemas'
 
 describe('average', () => {
@@ -91,5 +100,30 @@ describe('weeklyGoal', () => {
     expect(goal.total).toBe(7000) // only the last 7 days
     expect(goal.days).toBe(7)
     expect(goal.pct).toBeCloseTo(50)
+  })
+})
+
+describe('redesign insights', () => {
+  it('combines battery and sleep into readiness', () => {
+    const readiness = buildTrainingReadiness(
+      [{ date: '2025-10-20', level: 80 }],
+      [{ date: '2025-10-20', score: 90 }],
+    )
+    expect(readiness.score).toBe(84)
+    expect(readiness.label).toBe('Ready')
+  })
+
+  it('sums the last seven training load entries', () => {
+    const load = Array.from({ length: 8 }, (_, i) => ({
+      date: `2025-10-${10 + i}`,
+      acuteLoad: 100,
+      anaerobicLoad: 10,
+      highAerobicLoad: 20,
+      lowAerobicLoad: 30,
+      trainingStatus: i === 7 ? 'Productive' : 'Maintaining',
+    }))
+    const status = buildTrainingStatus(load)
+    expect(status.label).toBe('Productive')
+    expect(status.acuteLoad7d).toBe(700)
   })
 })

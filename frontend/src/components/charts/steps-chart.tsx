@@ -13,7 +13,7 @@ import { ChartTooltipContent, type ChartConfig } from '@/components/ui/chart'
 export type StepsPoint = { date: string; steps: number }
 
 const config: ChartConfig = {
-  steps: { label: 'Steps', color: 'hsl(var(--chart-1))' },
+  steps: { label: 'Steps', color: '#3fe87e' },
 }
 
 export function StepsChart({ data, goal }: { data: StepsPoint[]; goal?: number }) {
@@ -52,18 +52,18 @@ export function StepsChart({ data, goal }: { data: StepsPoint[]; goal?: number }
         {goal != null && (
           <ReferenceLine
             y={goal}
-            stroke="hsl(var(--muted-foreground))"
+            stroke="#e2bfb0"
             strokeDasharray="4 4"
             label={{
               value: `goal ${goal.toLocaleString()}`,
               position: 'insideTopRight',
-              fill: 'hsl(var(--muted-foreground))',
+              fill: '#e2bfb0',
               fontSize: 11,
             }}
           />
         )}
         <Tooltip
-          cursor={{ stroke: 'hsl(var(--border))' }}
+          cursor={{ stroke: '#2d2d2d' }}
           content={
             <ChartTooltipContent config={config} valueFormatter={(v) => Number(v).toLocaleString()} />
           }

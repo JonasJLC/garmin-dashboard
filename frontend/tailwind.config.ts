@@ -1,7 +1,7 @@
 import type { Config } from 'tailwindcss'
+import plugin from 'tailwindcss/plugin'
 
 export default {
-  darkMode: ['class'],
   content: [
     './index.html',
     './src/**/*.{ts,tsx}',
@@ -9,58 +9,94 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        sans: ['Hanken Grotesk', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
       },
       colors: {
-        border: 'hsl(var(--border))',
-        input: 'hsl(var(--input))',
-        ring: 'hsl(var(--ring))',
-        background: 'hsl(var(--background))',
-        foreground: 'hsl(var(--foreground))',
+        background: '#121212',
+        surface: '#131313',
+        'surface-dim': '#131313',
+        'surface-bright': '#393939',
+        'surface-container-lowest': '#0e0e0e',
+        'surface-container-low': '#1a1919',
+        'surface-container': '#1a1a1a',
+        'surface-container-high': '#242424',
+        'surface-container-highest': '#353534',
+        'on-background': '#e5e2e1',
+        'on-surface': '#e5e2e1',
+        'on-surface-variant': '#e2bfb0',
         primary: {
-          DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
+          DEFAULT: '#ffb693',
+          foreground: '#541900',
         },
-        secondary: {
-          DEFAULT: 'hsl(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))',
-        },
-        muted: {
-          DEFAULT: 'hsl(var(--muted))',
-          foreground: 'hsl(var(--muted-foreground))',
-        },
-        accent: {
-          DEFAULT: 'hsl(var(--accent))',
-          foreground: 'hsl(var(--accent-foreground))',
-        },
-        success: {
-          DEFAULT: 'hsl(var(--success))',
-          foreground: 'hsl(var(--success-foreground))',
-        },
-        destructive: {
-          DEFAULT: 'hsl(var(--destructive))',
-          foreground: 'hsl(var(--destructive-foreground))',
-        },
+        'primary-container': '#ff6b00',
+        'primary-fixed': '#ffdbcc',
+        'on-primary': '#541900',
+        'on-primary-container': '#000000',
+        secondary: '#3fe87e',
+        'secondary-container': '#00cb65',
+        'secondary-fixed': '#63ff94',
+        'on-secondary': '#003919',
+        tertiary: '#adc6ff',
+        'tertiary-container': '#5d97ff',
+        'tertiary-fixed': '#d8e2ff',
+        error: '#ffb4ab',
+        'error-container': '#93000a',
+        outline: '#2D2D2D',
+        'outline-variant': '#5a4136',
+        border: '#2D2D2D',
+        input: '#2D2D2D',
+        ring: '#ffb693',
+        foreground: '#e5e2e1',
+        'muted-foreground': '#e2bfb0',
         card: {
-          DEFAULT: 'hsl(var(--card))',
-          foreground: 'hsl(var(--card-foreground))',
+          DEFAULT: '#1a1a1a',
+          foreground: '#e5e2e1',
         },
         popover: {
-          DEFAULT: 'hsl(var(--popover))',
-          foreground: 'hsl(var(--popover-foreground))',
+          DEFAULT: '#1a1a1a',
+          foreground: '#e5e2e1',
+        },
+        muted: {
+          DEFAULT: '#242424',
+          foreground: '#e2bfb0',
+        },
+        accent: {
+          DEFAULT: '#242424',
+          foreground: '#e5e2e1',
+        },
+        success: {
+          DEFAULT: '#3fe87e',
+          foreground: '#003919',
+        },
+        destructive: {
+          DEFAULT: '#ffb4ab',
+          foreground: '#93000a',
         },
         chart: {
-          1: 'hsl(var(--chart-1))',
-          2: 'hsl(var(--chart-2))',
-          3: 'hsl(var(--chart-3))',
-          4: 'hsl(var(--chart-4))',
-          5: 'hsl(var(--chart-5))',
+          1: '#3fe87e',
+          2: '#ffb4ab',
+          3: '#adc6ff',
+          4: '#ffb693',
+          5: '#5d97ff',
         },
       },
+      spacing: {
+        xs: '4px',
+        sm: '8px',
+        md: '16px',
+        lg: '24px',
+        xl: '40px',
+        gutter: '16px',
+        'margin-desktop': '32px',
+      },
       borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)',
+        sm: '0.125rem',
+        DEFAULT: '0.125rem',
+        md: '0.125rem',
+        lg: '0.25rem',
+        xl: '0.5rem',
+        full: '0.75rem',
       },
       keyframes: {
         'fade-in-up': {
@@ -73,6 +109,43 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    plugin(({ addUtilities }) => {
+      addUtilities({
+        '.text-display-metrics': {
+          fontSize: '48px',
+          lineHeight: '56px',
+          fontWeight: '700',
+          letterSpacing: '0',
+        },
+        '.text-headline-lg': {
+          fontSize: '32px',
+          lineHeight: '40px',
+          fontWeight: '600',
+          letterSpacing: '0',
+        },
+        '.text-headline-md': {
+          fontSize: '20px',
+          lineHeight: '28px',
+          fontWeight: '600',
+          letterSpacing: '0',
+        },
+        '.text-label-caps': {
+          fontFamily: 'JetBrains Mono, ui-monospace, SFMono-Regular, monospace',
+          fontSize: '12px',
+          lineHeight: '16px',
+          fontWeight: '500',
+          letterSpacing: '0.05em',
+          textTransform: 'uppercase',
+        },
+        '.text-data-mono': {
+          fontFamily: 'JetBrains Mono, ui-monospace, SFMono-Regular, monospace',
+          fontSize: '14px',
+          lineHeight: '20px',
+          fontWeight: '400',
+          letterSpacing: '0',
+        },
+      })
+    }),
+  ],
 } satisfies Config
-

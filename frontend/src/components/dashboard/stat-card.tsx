@@ -5,10 +5,10 @@ import { Badge } from '@/components/ui/badge'
 import type { KpiStat } from '@/features/garmin/insights'
 
 const ACCENTS: Record<string, string> = {
-  steps: 'hsl(var(--chart-1))',
-  resting: 'hsl(var(--chart-2))',
-  calories: 'hsl(var(--chart-4))',
-  distance: 'hsl(var(--chart-5))',
+  steps: '#3fe87e',
+  resting: '#ffb4ab',
+  calories: '#ffb693',
+  distance: '#5d97ff',
 }
 
 function Sparkline({ series, color, gradientId }: { series: number[]; color: string; gradientId: string }) {
@@ -59,7 +59,7 @@ function DeltaBadge({ deltaPct, goodWhen }: Pick<KpiStat, 'deltaPct' | 'goodWhen
 }
 
 export function StatCard({ kpi, index = 0 }: { kpi: KpiStat; index?: number }) {
-  const color = ACCENTS[kpi.key] ?? 'hsl(var(--primary))'
+  const color = ACCENTS[kpi.key] ?? '#ffb693'
   return (
     <Card
       className="animate-fade-in-up overflow-hidden p-5"

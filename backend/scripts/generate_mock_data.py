@@ -110,6 +110,84 @@ def activity_list() -> list[dict[str, Any]]:
     ]
 
 
+def body_battery_series(rng: random.Random, dailies: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Return daily body battery and stress summaries, oldest first."""
+    series: list[dict[str, Any]] = []
+    for index, daily in enumerate(dailies):
+        level = int(_clamp(78 + rng.gauss(0, 8) - (index % 6), 60, 95))
+        stress = int(_clamp(28 + rng.gauss(0, 8), 15, 45))
+        series.append(
+            {
+                "date": daily["date"],
+                "level": level,
+                "maxLevel": int(_clamp(level + rng.randint(5, 12), level, 100)),
+                "drainRate": round(_clamp(rng.uniform(5, 8), 5, 8), 1),
+                "stressAvg": stress,
+            },
+        )
+    return series
+
+
+def sleep_series(rng: random.Random, dailies: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Return daily sleep scores and stage summaries, oldest first."""
+    series: list[dict[str, Any]] = []
+    for daily in dailies:
+        total = int(_clamp(rng.gauss(462, 35), 390, 540))
+        deep = int(total * _clamp(rng.gauss(0.2, 0.03), 0.14, 0.26))
+        rem = int(total * _clamp(rng.gauss(0.3, 0.04), 0.22, 0.36))
+        light = total - deep - rem
+        series.append(
+            {
+                "date": daily["date"],
+                "score": int(_clamp(rng.gauss(84, 7), 70, 95)),
+                "totalMinutes": total,
+                "deepMinutes": deep,
+                "lightMinutes": light,
+                "remMinutes": rem,
+            },
+        )
+    return series
+
+
+def biometrics_series(rng: random.Random, dailies: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Return daily SpO2, respiration, VO2 max, and recovery summaries."""
+    series: list[dict[str, Any]] = []
+    for index, daily in enumerate(dailies):
+        series.append(
+            {
+                "date": daily["date"],
+                "spo2Pct": int(_clamp(rng.gauss(97, 1), 95, 99)),
+                "respirationBrpm": round(_clamp(rng.gauss(14.5, 0.8), 13, 16), 1),
+                "vo2MaxMlKgMin": round(_clamp(61 + index * 0.05 + rng.gauss(0, 1.2), 58, 65), 1),
+                "recoveryTimeHrs": int(_clamp(rng.gauss(19, 4), 14, 24)),
+            },
+        )
+    return series
+
+
+def training_load_series(rng: random.Random, dailies: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Return daily training load summaries, oldest first."""
+    statuses = ["Productive", "Maintaining", "Peaking"]
+    series: list[dict[str, Any]] = []
+    for index, daily in enumerate(dailies):
+        acute = int(_clamp(rng.gauss(700, 120), 500, 900))
+        anaerobic = int(acute * _clamp(rng.gauss(0.18, 0.04), 0.1, 0.26))
+        high = int(acute * _clamp(rng.gauss(0.38, 0.05), 0.28, 0.48))
+        low = acute - anaerobic - high
+        series.append(
+            {
+                "date": daily["date"],
+                "acuteLoad": acute,
+                "chronicLoad": int(_clamp(rng.gauss(650, 90), 500, 900)),
+                "anaerobicLoad": anaerobic,
+                "highAerobicLoad": high,
+                "lowAerobicLoad": low,
+                "trainingStatus": statuses[index % len(statuses)],
+            },
+        )
+    return series
+
+
 def clear_snapshots(out_dir: Path) -> None:
     """Remove existing per-day snapshots so regeneration stays idempotent."""
     for pattern in ("daily-*.json", "hr-*.json"):
@@ -131,6 +209,10 @@ def main() -> None:
         write_json(out / f"hr-{hr['date']}.json", hr)
 
     write_json(out / "activities.json", activity_list())
+    write_json(out / "body-battery.json", body_battery_series(rng, dailies))
+    write_json(out / "sleep-summary.json", sleep_series(rng, dailies))
+    write_json(out / "biometrics.json", biometrics_series(rng, dailies))
+    write_json(out / "training-load.json", training_load_series(rng, dailies))
 
     manifest = build_manifest([d["date"] for d in dailies])
     manifest["updatedAt"] = _UPDATED_AT

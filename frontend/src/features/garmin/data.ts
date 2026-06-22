@@ -1,13 +1,21 @@
 import { z } from 'zod'
 import {
   ActivitiesSchema,
+  BiometricSummaryListSchema,
+  BodyBatteryListSchema,
   DailySummarySchema,
   HeartRateSummarySchema,
   ManifestSchema,
+  SleepSummaryListSchema,
+  TrainingLoadListSchema,
   type Activity,
+  type BiometricSummary,
+  type BodyBattery,
   type DailySummary,
   type HeartRateSummary,
   type Manifest,
+  type SleepSummary,
+  type TrainingLoad,
 } from './schemas'
 
 async function loadJson<T>(path: string, schema: z.ZodType<T>): Promise<T> {
@@ -40,6 +48,27 @@ export function getActivities(): Promise<Activity[]> {
   return loadJson(`${base}data/garmin/activities.json`, ActivitiesSchema)
 }
 
+export function getBodyBattery(): Promise<BodyBattery[]> {
+  return loadJson(`${base}data/garmin/body-battery.json`, BodyBatteryListSchema)
+}
+
+export function getSleepSummaries(): Promise<SleepSummary[]> {
+  return loadJson(`${base}data/garmin/sleep-summary.json`, SleepSummaryListSchema)
+}
+
+export function getBiometrics(): Promise<BiometricSummary[]> {
+  return loadJson(`${base}data/garmin/biometrics.json`, BiometricSummaryListSchema)
+}
+
+export function getTrainingLoad(): Promise<TrainingLoad[]> {
+  return loadJson(`${base}data/garmin/training-load.json`, TrainingLoadListSchema)
+}
+
+export const fetchBodyBattery = getBodyBattery
+export const fetchSleepSummaries = getSleepSummaries
+export const fetchBiometrics = getBiometrics
+export const fetchTrainingLoad = getTrainingLoad
+
 // Load summaries for many dates, keeping only the ones that resolve so a single
 // missing/invalid day does not blank the whole dashboard. Order follows `dates`.
 export async function getDailySummaries(dates: string[]): Promise<DailySummary[]> {
@@ -61,5 +90,4 @@ export async function getHeartRateSummaries(dates: string[]): Promise<HeartRateS
 export function sumSteps(summaries: Pick<DailySummary, 'steps'>[]): number {
   return summaries.reduce((total, s) => total + s.steps, 0)
 }
-
 
